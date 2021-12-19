@@ -1,7 +1,8 @@
 import { CBOR } from "https://js.sabae.cc/CBOR.js";
-import { blake } from 'https://taisukef.github.io/blakejs_es/blake2s.js';
+import { blake } from "https://taisukef.github.io/blakejs_es/blake2s.js";
 import Ed25519 from "https://taisukef.github.io/forge-es/lib/ed25519.js";
 import { TAI64N } from "https://code4fukui.github.io/TAI64N-es/TAI64N.js";
+import { hex } from "https://code4sabae.github.io/js/hex.js";
 
 class Rensa {
   constructor(sF) {
@@ -14,6 +15,12 @@ class Rensa {
   static P_PUBKEY = 2;
   static P_SIGNATURE = 3;
   static P_PAYLOAD = 4;
+
+  static KINDS = [
+    "kind0",
+    "kind1",
+    "kind2",
+  ];
 
   static fromCBOR(input) {
     const trx = new Rensa();
@@ -38,7 +45,7 @@ class Rensa {
 
       //TODO: verify TYPE?
   
-      const message = this.innerSignDigest(
+      const message = this._innerSignDigest(
         element[Rensa.P_KIND],
         element[Rensa.P_TAI64N],
         i > 0 ? this.data[i - 1][Rensa.P_SIGNATURE] : null, //last Signature
@@ -58,7 +65,7 @@ class Rensa {
     return true;
   }
 
-  innerSignDigest(k, tai64, lastSig, encData) {
+  _innerSignDigest(k, tai64, lastSig, encData) {
     //first we create the hash
     const ctx = blake.blake2sInit(32, "Rensa OFFICIAL CLIENT");
     blake.blake2sUpdate(ctx, k);
@@ -86,7 +93,7 @@ class Rensa {
       }
     }
 
-    const signatureDigest = this.innerSignDigest(kind, tai64nNow, lastSig, encData);
+    const signatureDigest = this._innerSignDigest(kind, tai64nNow, lastSig, encData);
     const [pubKey, signature] = this.signFunc(signatureDigest);
 
     this.data.push([
@@ -100,11 +107,18 @@ class Rensa {
 
   toString() {
     const ss = [];
-    ss.push(`{`);
+    ss.push(`[`);
     for (const d of this.data) {
-      ss.push(`  [${TYPES[d[0]]}, ]`)
+      const dd = [
+        Rensa.KINDS[d[Rensa.P_KIND]],
+        TAI64N.stringify(d[Rensa.P_TAI64N]),
+        hex.fromBin(d[Rensa.P_PUBKEY]),
+        hex.fromBin(d[Rensa.P_SIGNATURE]),
+        JSON.stringify(CBOR.decode(d[Rensa.P_PAYLOAD]))
+      ];
+      ss.push(`  [${dd.join(", ")}]`);
     }
-    ss.push(`}`);
+    ss.push(`]`);
     return ss.join("\n");
   }
   toCBOR() {
