@@ -4,6 +4,13 @@ Rensa: Simple signature infrastructure for transactional data
 
 ⚠️ Work in Progress ⚠️
 
+## how to run
+
+install [Deno](https://deno.land/)
+```
+$ deno run -A example.js
+```
+
 ## Copyright and License
 
 Copyright 2021 Kristopher Tate and Fukuno Taisuke. All Rights Reserved.
