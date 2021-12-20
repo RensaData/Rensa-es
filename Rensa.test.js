@@ -31,3 +31,18 @@ Deno.test("load from corrupted file", async () => {
   bin[10] = 0; 
   t.assert(Rensa.fromCBOR(bin) == null);
 });
+/*
+Deno.test("playback", async () => {
+  const bin = await Deno.readFile("test.rensa");
+  const trx = Rensa.fromCBOR(bin);
+  let idx = 0;
+  trx.playback((err, timestamp, publicKey, msg, obj) => {
+    if (err) {
+      return false;
+    }
+    const pkey = hex.fromBin(publicKey);
+    console.log(obj);
+    return false;
+  });
+});
+*/

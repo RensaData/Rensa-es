@@ -16,16 +16,20 @@ class Rensa {
   static P_SIGNATURE = 3;
   static P_PAYLOAD = 4;
 
-  static KINDS = [
-    "kind0",
-    "kind1",
-    "kind2",
-  ];
+  static KIND_ROOT = 0x01;
+  static KIND_OVERWRITE = 0x02;
+
+  static KINDS = {
+    0x01: "KIND_ROOT",
+    0x02: "KIND_OVERWRITE",
+  };
 
   static fromCBOR(input) {
     const trx = new Rensa();
     trx.data = CBOR.decode(input);
-    if (!trx.verify()) return null;
+    if (!trx.verify()) {
+      return null;
+    }
     return trx;
   }
   
@@ -63,6 +67,58 @@ class Rensa {
       }
     }
     return true;
+  }
+
+  // callback(err, timestmap, publicKey, update_payload, document_at_point) break if ret true
+  playback(cb) {
+    const obj = {};
+    for (let i = 0; i < this.data.length; i++) {
+      const element = this.data[i];
+      //
+      const publicKey = element[Rensa.P_PUBKEY];
+      const signature = element[Rensa.P_SIGNATURE];
+
+      //verify datetime
+      if (i > 0) {
+        if (TAI64N.lt(element[Rensa.P_TAI64N], this.data[i - 1][Rensa.P_TAI64N])) {
+          cb(true);
+          return;
+        }
+      }
+
+      //TODO: verify TYPE?
+      const payload = element[Rensa.P_PAYLOAD];
+      const tai64n = element[Rensa.P_TAI64N];
+      const message = this._innerSignDigest(
+        element[Rensa.P_KIND],
+        tai64n,
+        i > 0 ? this.data[i - 1][Rensa.P_SIGNATURE] : null, //last Signature
+        payload
+      );
+  
+      const result = Ed25519.verify({
+        signature,
+        message,
+        publicKey,
+        encoding: "binary"
+      });
+      if (!result) {
+        cb(true);
+        return;
+      }
+
+      const pl = CBOR.decode(payload);
+      for (const name in pl) {
+        if (pl[name] == null) {
+          delete obj[name];
+        } else {
+          obj[name] = pl[name];
+        }
+      }
+      if (cb(false, TAI64N.toDate(tai64n), publicKey, pl, obj)) {
+        break;
+      }
+    }
   }
 
   _innerSignDigest(k, tai64, lastSig, encData) {
