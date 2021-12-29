@@ -123,11 +123,12 @@ class Rensa {
 
   _innerSignDigest(k, tai64, lastSig, encData) {
     //first we create the hash
-    const ctx = blake.blake2sInit(32, "Rensa OFFICIAL CLIENT");
-    blake.blake2sUpdate(ctx, k);
+    const enc = (s) => new TextEncoder().encode(s);
+    const ctx = blake.blake2sInit(32, enc("Rensa OFFICIAL CLIENT"));
+    blake.blake2sUpdate(ctx, enc(k));
     blake.blake2sUpdate(ctx, tai64);
     if (!lastSig) {
-      blake.blake2sUpdate(ctx, '\0'); // if no last signature, update with null byte
+      blake.blake2sUpdate(ctx, new Uint8Array(1)); // if no last signature, update with null byte
     } else {
       blake.blake2sUpdate(ctx, lastSig);
     }
