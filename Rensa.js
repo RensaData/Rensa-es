@@ -32,7 +32,7 @@ class Rensa {
     }
     return trx;
   }
-  
+
   verify() {
     for (let i = 0; i < this.data.length; i++) {
       const element = this.data[i];
@@ -81,8 +81,10 @@ class Rensa {
       //verify datetime
       if (i > 0) {
         if (TAI64N.lt(element[Rensa.P_TAI64N], this.data[i - 1][Rensa.P_TAI64N])) {
-          cb(true);
-          return;
+          if (cb) {
+            cb(true);
+          }
+          return null;
         }
       }
 
@@ -103,8 +105,10 @@ class Rensa {
         encoding: "binary"
       });
       if (!result) {
-        cb(true);
-        return;
+        if (cb) {
+          cb(true);
+        }
+        return null;
       }
 
       const pl = CBOR.decode(payload);
@@ -115,10 +119,11 @@ class Rensa {
           obj[name] = pl[name];
         }
       }
-      if (cb(false, TAI64N.toDate(tai64n), publicKey, pl, obj)) {
+      if (cb && cb(false, TAI64N.toDate(tai64n), publicKey, pl, obj)) {
         break;
       }
     }
+    return obj;
   }
 
   _innerSignDigest(k, tai64, lastSig, encData) {
