@@ -4,24 +4,42 @@ import Ed25519 from "https://taisukef.github.io/forge-es/lib/ed25519.js";
 import { TAI64N } from "https://code4fukui.github.io/TAI64N-es/TAI64N.js";
 import { hex } from "https://code4sabae.github.io/js/hex.js";
 
+class CStore {
+  constructor() {
+    this.store = {};
+  }
+}
+
 class Rensa {
   constructor(sF) {
     this.data = [];
+    this.cstore = new CStore();
     this.signFunc = sF;
   }
 
   static P_KIND = 0;
-  static P_TAI64N = 1;
-  static P_PUBKEY = 2;
-  static P_SIGNATURE = 3;
-  static P_PAYLOAD = 4;
+  
+  static PD_TAI64N = 1;
+  static PD_PUBKEY = 2;
+  static PD_SIGNATURE = 3;
+  static PD_PAYLOAD = 4;
 
+  static PC_PUBKEY = 1;
+  static PC_SIGNATURE = 2;
+  static PC_PAYLOAD = 3;
+
+  // data
   static KIND_ROOT = 0x01;
   static KIND_OVERWRITE = 0x02;
+
+  //certificates
+  static KIND_CERTIFICATE = 0x10;
 
   static KINDS = {
     0x01: "KIND_ROOT",
     0x02: "KIND_OVERWRITE",
+    //
+    0x10: "KIND_OVERWRITE",
   };
 
   static fromCBOR(input) {
@@ -166,6 +184,24 @@ class Rensa {
       encData,
     ]);
   }
+
+  addCertificate(issuer_pubkey, issued_payload_sig, issued_payload_cbor) {
+    //static PD_PUBKEY = 1;
+    //static PC_SIGNATURE = 2;
+    //static PC_PAYLOAD = 3;
+
+    this.data.push([
+      kind,
+      issuer_pubkey,
+      issued_payload_sig,
+      issued_payload_cbor,
+    ]);
+
+    //1 does cbor payload match sig from pubkey
+    //2 open payload and check that ik matches PD_PUBKEY
+    
+  }
+
 
   toString() {
     const ss = [];
