@@ -235,22 +235,22 @@ class Rensa {
       const kind = d[Rensa.P_KIND];
       let dd = null;
       if ((kind & Rensa.KIND_MASK_DATA) == kind) {
-          dd = [
-          Rensa.KINDS[kind],
-          TAI64N.stringify(d[Rensa.PD_TAI64N]),
-          hex.fromBin(d[Rensa.PD_PUBKEY]),
-          hex.fromBin(d[Rensa.PD_SIGNATURE]),
-          JSON.stringify(CBOR.decode(d[Rensa.PD_PAYLOAD]))
+        dd = [
+          "P_KIND: " + Rensa.KINDS[kind],
+          "PD_TAI64N: " + TAI64N.stringify(d[Rensa.PD_TAI64N]),
+          "PD_PUBKEY: " + hex.fromBin(d[Rensa.PD_PUBKEY]),
+          "PD_SIGNATURE: " + hex.fromBin(d[Rensa.PD_SIGNATURE]),
+          "PD_PAYLOAD: " + JSON.stringify(CBOR.decode(d[Rensa.PD_PAYLOAD]))
         ];
       } else {
         dd = [
-          Rensa.KINDS[kind],
-          hex.fromBin(d[Rensa.PC_PUBKEY]),
-          hex.fromBin(d[Rensa.PC_SIGNATURE]),
-          JSON.stringify(CBOR.decode(d[Rensa.PC_PAYLOAD]))
+          "P_KIND: " + Rensa.KINDS[kind],
+          "PC_PUBKEY: " + hex.fromBin(d[Rensa.PC_PUBKEY]),
+          "PC_SIGNATURE: " + hex.fromBin(d[Rensa.PC_SIGNATURE]),
+          "PC_PAYLOAD: " + JSON.stringify(CBOR.decode(d[Rensa.PC_PAYLOAD]))
         ];
       }
-      ss.push(`  [${dd.join(", ")}]`);
+      ss.push(`  { ${dd.join(", ")} },`);
     }
     ss.push(`]`);
     return ss.join("\n");
