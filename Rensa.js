@@ -37,10 +37,10 @@ class Rensa {
     0x10: "KIND_OVERWRITE",
   };
 
-  static fromCBOR(input) {
+  static fromCBOR(input, doverify = true) {
     const trx = new Rensa();
     trx.data = CBOR.decode(input);
-    if (!trx.verify()) {
+    if (doverify && !trx.verify()) {
       return null;
     }
     return trx;
