@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Rensa dump</title>
+<script type="module">
+import { waitDropFiles } from "https://code4sabae.github.io/js/waitDropFiles.js";
+import { readAsArrayBufferAsync } from "https://code4sabae.github.io/js/readAsArrayBufferAsync.js";
+import { CBOR } from "https://js.sabae.cc/CBOR.js";
+import { Rensa } from "https://rensadata.github.io/Rensa-es/Rensa.js";
+
+onload = async () => {
+  for (;;) {
+    const files = await waitDropFiles(drop);
+    const file = files[0];
+    const buffer = await readAsArrayBufferAsync(file.file);
+    const bin = new Uint8Array(buffer);
+    const rensa = Rensa.fromCBOR(bin);
+    console.log(rensa);
+    drop.textContent = rensa.toString();
+  }
+};
+</script>
+
+<style>
+#drop {
+  min-height: 10em;
+  border: 2px dotted gray;
+  padding: 1em;
+  margin: 1em;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+</style>
+
+</head>
+<body>
+<h1>Rensa dump</h1>
+<div id="drop"></div>
+<a href=https://github.com/RensaData/Rensa-es/>Rensa on GitHub</a>
+</body>
+</html>
