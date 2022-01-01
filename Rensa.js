@@ -51,7 +51,7 @@ class Rensa {
       const element = this.data[i];
       //
       const kind = element[Rensa.P_KIND];
-      if (kind & Rensa.KIND_MASK_DATA) {
+      if ((kind & Rensa.KIND_MASK_DATA) == kind) {
         const publicKey = element[Rensa.PD_PUBKEY];
         const signature = element[Rensa.PD_SIGNATURE];
 
@@ -234,8 +234,8 @@ class Rensa {
     for (const d of this.data) {
       const kind = d[Rensa.P_KIND];
       let dd = null;
-      if (kind & Rensa.P_KIND_MASK_DATA) {
-        dd = [
+      if ((kind & Rensa.KIND_MASK_DATA) == kind) {
+          dd = [
           Rensa.KINDS[kind],
           TAI64N.stringify(d[Rensa.PD_TAI64N]),
           hex.fromBin(d[Rensa.PD_PUBKEY]),
